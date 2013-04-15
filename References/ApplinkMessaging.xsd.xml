@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!-- New document created by Praveen Yalavarty (Ford Motor Company) at Fri Aug 19 14:54:19 EDT 2011 -->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:am="urn:ford/Vehicle/Module/Applink/Messaging/v1.0"
+            targetNamespace="urn:ford/Vehicle/Module/Applink/Messaging/v1.0"
+            elementFormDefault="qualified">
+
+    <xsd:annotation>
+        <xsd:documentation>
+		This schema contains definitions for the elements to be used 
+		for Applink based messaging services hosted by Ford. 
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:complexType abstract="true" name="ApplinkMessageType">
+        <xsd:annotation>
+            <xsd:documentation>  Abstract class representing a Applink message. See
+                ApplinkInboundMessageType and ApplinkOutboundMessageType.
+
+                PayloadBits=The actual payload bits encoded in base64Binary
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="PayloadBits" nillable="true" type="am:PayloadBitsType" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="PayloadBitsType">
+            <xsd:sequence>
+                <xsd:element name="Bits" type="xsd:base64Binary"></xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name="size" type="xsd:int"></xsd:attribute>
+    </xsd:complexType>    
+    
+    <xsd:complexType name="ApplinkInboundMessageType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Message initiated from the module over Applink and targeted to a Ford backend service 
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="am:ApplinkMessageType"></xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="ApplinkOutboundMessageType">
+        <xsd:annotation>
+            <xsd:documentation>
+                 Message initiated from a Ford backend system targetting a module over Applink channel.  
+                 The message may carry 1 or more segments in the PayloadBits collection. The segments 
+                 should be downloaded to the module in the order listed in the message. 
+                 Each segment is a full SyncP message.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="am:ApplinkMessageType"></xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>    
+    <xsd:element name="PayloadBits" type="am:PayloadBitsType" />
+    <xsd:element name="ApplinkInboundMessage" type="am:ApplinkInboundMessageType" />
+    <xsd:element name="ApplinkOutboundMessage" type="am:ApplinkOutboundMessageType" />
+</xsd:schema>

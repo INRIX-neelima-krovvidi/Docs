@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DrivingDirections" targetNamespace="urn:ford/marketing/sync/drivingDirections/v1.0"
+	elementFormDefault="qualified" xmlns="urn:ford/marketing/sync/drivingDirections/v1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.1">
+
+    <xs:annotation>
+        <xs:documentation>
+            Changes from version 1.0 to version 1.1 
+                1. Added new complexType VehiclePositionAttributeInfoType for capturing 
+                Vehicle heading direction and Vehicle Speed elements
+                2. Added new complexType VehicleGPSPayloadType that encapsulates 
+                LocationType and VehiclePositionAttributeInfoType 
+        </xs:documentation>
+    </xs:annotation>
+    
+    <xs:complexType name="DirectionsType">
+        <xs:annotation>
+            <xs:documentation>
+                Contains turn-by-turn driving directions. The
+                directions
+                are packaged into Segments (see SegmentsType).
+
+                Location =
+                Location (GPS position) of the vehicle at the
+                time the user requested
+                the directions to be downloaded
+
+                Segments = see Segments type
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Location" type="LocationType" />
+            <xs:element name="Segments" type="SegmentsType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="LocationType">
+        <xs:annotation>
+            <xs:documentation>
+                Type to represent position information - Latitude
+                and Longitude 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Lat">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:minInclusive value="-90.0"></xs:minInclusive>
+                        <xs:maxInclusive value="90.0"></xs:maxInclusive>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+
+            <xs:element name="Long">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:minInclusive value="-180.0"></xs:minInclusive>
+                        <xs:maxInclusive value="180.0"></xs:maxInclusive>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SegmentsType">
+        <xs:annotation>
+            <xs:documentation>
+                Contains turn-by-turn directions, packaged for
+                consumption on Sync modules.
+
+                The directions are packaged into
+                multiple segments. Each
+                segment will be converted into an individual
+                SyncP
+                message. The segmentation of the turn-by-turn directions
+                will
+                result in faster user response times. The module
+                can process a
+                segment as it is downloaded (and while
+                later segments are still being
+                downloaded).
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Segment" type="xs:base64Binary"
+                minOccurs="1" maxOccurs="3" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Segments" type="SegmentsType" />
+    <xs:element name="Directions" type="DirectionsType" />
+
+    <xs:complexType name="DestinationType">
+        <xs:annotation>
+            <xs:documentation>
+                Contains destination name, address phone and lat
+                long information for a destination
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+
+            <xs:element name="Name">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="0" />
+                        <xs:maxLength value="256" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="Type" type="DestinationTypesEnum" />
+            <xs:element name="Address" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Please see TDI Specification document for the
+                        text format of the address</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="0" />
+                        <xs:maxLength value="256" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="Phone" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="\d*" />
+                        <xs:minLength value="0" />
+                        <xs:maxLength value="13" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="Location" type="LocationType" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="DestinationTypesEnum">
+        <xs:annotation>
+            <xs:documentation>
+                Mapping to SyncP DestinationType field:
+
+                0 = unknown
+                1 = business / POI listing
+                2 = saved point
+                3 = intersection
+                4 = address
+                5 = city center
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Unknown" />
+            <xs:enumeration value="POI" />
+            <xs:enumeration value="SavedPoint" />
+            <xs:enumeration value="Intersection" />
+            <xs:enumeration value="Address" />
+            <xs:enumeration value="CityCenter" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    
+<xs:element name="Destination" type="DestinationType" />
+    
+    <xs:complexType name="VehiclePositionAttributeInfoType">
+        <xs:annotation>
+            <xs:documentation>  Type to represent additional vehicle position information (Speed of the vehicle,
+                  direction the vehicle is heading )</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Speed" type="xs:decimal"/>
+            <xs:element name="Heading" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VehicleGPSPayloadType">
+        <xs:annotation>
+            <xs:documentation>  Type to represent the vehicle position information at the time the user 
+                  requested the driving directions. 
+                  
+            Location = Location (GPS position) of the vehice at the
+                time the user requested the driving directions.
+                
+                  PositionAttributes = see VehiclePositionAttributeInfoType</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Location" type="LocationType"/>
+            <xs:element name="VehiclePositionAttributeInfo" type="VehiclePositionAttributeInfoType"/>
+        </xs:sequence>
+    </xs:complexType>    
+
+    <xs:element name="VehicleGPSPayload" type="VehicleGPSPayloadType" />
+
+</xs:schema>
